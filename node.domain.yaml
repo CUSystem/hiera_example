@@ -1,0 +1,10 @@
+---
+classes:
+  - pt_role::%{::ps_role}
+
+domain_type: all 
+
+appserver_domain_list:
+ "%{hiera('appserver_domain_name')}":
+   feature_settings:
+     PUBSUB:        "Yes"
