@@ -1,0 +1,398 @@
+---
+ensure:   present
+env_type: midtier
+
+db_name:                  "%{::db_name}"
+gateway_node_name:        "%{hiera('db_name')}"
+portal_cluster_node_list: "%{hiera('gateway_node_name')}"
+cu_ib_psserver_list:      "%{::fqdn}"
+cu_redirect_url:          "./%{hiera('pia_site_name')}/signon.html"
+
+weblogic_patches:
+  p24904852_jan17cpu: '/app_software/oracle/weblogic_patches/p24904852_121300_Generic.zip'
+
+tuxedo_patches:
+  p24497791_rp092: '/app_software/oracle/tuxedo_patches/p24497791_121300_Linux-x86-64.zip'
+
+# Hash for building out Help URLs
+# http://www.oracle.com/pls/topic/lookup?id=%CONTEXT_ID%&ctx=UlinkID1&ctx=UlinkID2
+# "http://www.oracle.com/pls/topic/lookup?id=%CONTEXT_ID%&ctx=%{hiera('help_uri_table['peopletools'])}"
+help_uri: pt855pbr0
+help_uri_table:
+  peopletools: 'pt855pbr0'
+  ih:          'ps91pbr6'
+  cs:          'cs92pbr1'
+  hcm:         'hcm92pbr11'
+  fin:         'fscm92pbr9'
+  crm:         'crm92pbr8'
+
+# CU PSAdmin Definitive Media Library Base
+cu_dml: ''
+
+# PeopleTools Install Locations
+dpk_base:         "%{hiera('cu_dml')}/oracle/peopletools/%{hiera('tools_version')}"
+dpk_location:     "%{hiera('dpk_base')}/dpk"
+archive_location: "%{hiera('dpk_base')}/archives"
+jdk_location:     "%{hiera('pt_location')}/jdk1.7"
+
+
+ps_home_location: "%{hiera('pt_location')}/%{hiera('tools_version')}"
+
+cfg_location:     "/opt/pscfg"
+ps_config_home:   "%{hiera('cfg_location')}/%{::ps_environment}"
+
+ps_app_home:
+  db_type:      "%{hiera('db_platform')}"
+  location:     "%{hiera('pt_location')}/ps_app_home"
+  extract_only: false
+
+pi_home:
+  location: "%{hiera('pt_location')}/pi_home"
+
+ps_cust_home:
+  location: "/opt/pscust/%{::ps_environment}"
+  remove:   true
+
+# commenting out to go back to default
+#tns_dir:            "/tnsadmin"
+cu_update_tns:       "true"
+tns_admin_list:
+  "%{hiera('db_name')}":
+    db_host:         "%{hiera('cu_rac_host')}"
+    db_port:         "%{hiera('db_port')}"
+    db_protocol:     TCP
+    db_service_name: "%{hiera('db_name')}"
+
+setup_samba:         false
+setup_services:      false
+setup_cobol:         false
+setup_erp_firewall:  true
+setup_ping_auth:     true
+setup_taleo:         false
+setup_duoweb:        false
+setup_smarterp:      false
+setup_automic:       false # use to have puppet install/not install automic agents
+deploy_apphome_only: false
+
+# Settings to Manage in Configuration.propertes for a web server
+# This is primarily to ensure the WebUserId because the installer forces PTWEBSERVER
+# regardless of your response file
+configurationproperties:
+  "":
+    WebUserId: ''
+
+#### BEGIN USERS ####
+psft_user_pwd:   '*'
+oracle_user_pwd: '*'
+
+users:
+  tools_install_user:
+    name:     "%{hiera('psft_install_user_name')}"
+    uid:      '1620'
+    gid:      "%{hiera('oracle_install_group_name')}"
+    groups:   "%{hiera('psft_runtime_group_name')}"
+    expiry:   absent
+    home_dir: "%{hiera('user_home_dir')}/%{hiera('psft_install_user_name')}"
+    password: "%{hiera('psft_user_pwd')}"
+  psft_runtime_user:
+    name:     "%{hiera('psft_runtime_user_name')}"
+    uid:      '1621'
+    gid:      "%{hiera('oracle_install_group_name')}"
+    groups:   "%{hiera('psft_runtime_group_name')}"
+    expiry:   absent
+    home_dir: "%{hiera('user_home_dir')}/%{hiera('psft_runtime_user_name')}"
+    password: "%{hiera('psft_user_pwd')}"
+  app_install_user:
+    name:     "%{hiera('psft_app_install_user_name')}"
+    uid:      '1622'
+    gid:      "%{hiera('psft_app_install_group_name')}"
+    groups:   "%{hiera('psft_runtime_group_name')}"
+    expiry:   absent
+    home_dir: "%{hiera('user_home_dir')}/%{hiera('psft_app_install_user_name')}"
+    password: "%{hiera('psft_user_pwd')}"
+  oracle_user:
+    name:     "%{hiera('oracle_user_name')}"
+    uid:      '502'
+    gid:      "%{hiera('oracle_install_group_name')}"
+    groups:   "%{hiera('oracle_runtime_group_name')}"
+    expiry:   absent
+    home_dir: "%{hiera('user_home_dir')}/%{hiera('oracle_user_name')}"
+    password: "%{hiera('oracle_user_pwd')}"
+
+### BEGIN GROUPS ###
+groups:
+  psft_runtime_group:
+    name:     "%{hiera('psft_runtime_group_name')}"
+    gid:      '6001'
+  app_install_group:
+    name:     "%{hiera('psft_app_install_group_name')}"
+    gid:      '6002'
+  oracle_install_group:
+    name:     "%{hiera('oracle_install_group_name')}"
+    gid:      '6003'
+  oracle_runtime_group:
+    name:     "%{hiera('oracle_runtime_group_name')}"
+
+# PSOPRDEFN Users
+db_user:                      ""
+profile_user:                 ""
+cu_ib_user:                   ""
+cu_anon_user:                 ""
+####  END USERS  ####
+
+## CU Common Config ##
+pia_domain_name:              "%{::ps_environment}"
+pia_site_name:                "%{::ps_environment}"
+appserver_domain_name:        "%{::ps_environment}"
+prcs_domain_name:             "%{::ps_environment}"
+ps_uri:                       "%{::ps_environment}.%{::region}.cu.edu"
+uri_port:                     "443"
+
+#### BEGIN WEBSERVER ####
+# Webserver Common Config
+report_node_name:             psreports
+webserver_type:               weblogic
+report_repository_dir:        '/opt/psreports'
+pia_domain_list:
+  "%{hiera('pia_domain_name')}":
+    config_settings:
+      Servers/PIA:
+        CustomIdentityKeyStorePassPhrase:   "%{hiera('cu_keystore_password')}"
+        CustomTrustKeyStorePassPhrase:      "%{hiera('cu_keystore_password')}"
+        KeyStores:                          CustomIdentityAndJavaStandardTrust
+        WeblogicPluginEnabled:              true
+        #UnicastListenPort:                  '0'
+        #LocalStorageEnabled:                true
+        #CoherenceClusterSystemResource:     "%{hiera('pia_domain_name')}"
+      Servers/PIA/SSL/PIA:
+        ServerPrivateKeyAlias:              "%{::fqdn}"
+        ServerPrivateKeyPassPhrase:         "%{hiera('cu_keystore_password')}"
+      Servers/PIA/WebServer/PIA/WebServerLog/PIA:
+        LoggingEnabled:                     true
+        RotateLogOnStartup:                 false
+        ELFFields:                          'date time c-ip sc-status time-taken sc-bytes cs-method cs-uri cs(User-Agent)'
+        RotationTime:                       '23:59'
+        FileCount:                          '15'
+        RotationType:                       'byTime'
+        FileName:                           './logs/PIA_%yyyy%%MM%%dd%_PIA_access.log'
+        LogFileFormat:                      'extended'
+      Log/%{hiera('pia_domain_name')}:
+        RotateLogOnStartup:                 false
+        RotationTime:                       '23:59'
+        FileCount:                          '15'
+        RotationType:                       'byTime'
+        FileName:                           './logs/PIA_%yyyy%%MM%%dd%_internal.log'
+      Servers/PIA/Log/PIA:
+        RotateLogOnStartup:                 false
+        RotationTime:                       '23:59'
+        FileCount:                          '15'
+        RotationType:                       'byTime'
+        FileName:                           './logs/PIA_%yyyy%%MM%%dd%_weblogic.log'
+        LogFileSeverity:                    'Info'
+        RedirectStdoutToServerLogEnabled:   true
+
+    site_list:
+      "%{hiera('pia_site_name')}":
+        webprofile_settings:
+          profile_user:                         "%{hiera('profile_user')}"
+
+#### PRCS common ####
+# To create addional PSUNX servers create this same variable in the
+# in the .yaml file for the node where you need a different name
+# leave this one in place so the first PSUNX server gets the PSUNX name by default
+prcs_domain_id:               PSUNX
+
+#### BEGIN Firewall ####
+# 8000/8443 HTTP/HTTPS for WebLogic
+# 9033-90XX JSL/JSH Ports
+# 8088-89/9088, 7 Coherence cluster ports
+firewall_multis:
+  '00100 accept http/https/jsl for PeopleSoft':
+    dport: [8000, 8443, 9033-9053, 8088, 8089 9088, 7]
+    action: 'accept'
+    proto: ['tcp', 'udp']
+ ####  END Firewall  ####
+
+#### BEGIN ACM ####
+component_preboot_setup_list:
+  web_profile:
+    acm_plugin_list:
+      PTWebProfileConfig:
+        env.webprofilename:               "%{hiera('pia_webprofile_name')}"
+        env.helpurl:                      "http://www.oracle.com/pls/topic/lookup?id=%CONTEXT_ID%&ctx=%{hiera('help_uri')}"
+        env.updateonlycustomproperty:     N
+        env.propertyname:                 EnablePNSubscriptions
+        env.validationtype:               1
+        env.longvalue:                    true
+        env.propertyname:                 InPortalContext
+        env.validationtype:               1
+        env.longvalue:                    false
+        env.authtokendomain:              ".%{::domain}"
+        env.useridcookieage:              '0'
+        env.warningtimeout:               "%{hiera('cu_warningtimeout')}"
+        env.sessiontimeout:               "%{hiera('cu_sessiontimeout')}"
+        env.timeoutwarnscript:            'WEBLIB_TIMEOUT.PT_TIMEOUTWARNING.FieldFormula.IScript_TIMEOUTWARNING'
+        env.bypasssignon:                 'Y'
+        env.defaultuserid:                ''
+        env.defaultpwd:                   "%{hiera('cu_public_user_pwd')}"
+        env.publicsesstimeout:            '1200'
+        env.testing:                      'Y'
+        env.expirepage:                   'expire.html,expire.wml'
+        env.signonerrorpage:              'signin.html,signin.wml'
+        env.logoutpage:                   'signin.html,signin.wml'
+        env.defaultport:                  '443'
+        env.defaultscheme:                'https'
+        env.pswebservername:              "%{hiera('ps_uri')}"
+        env.connectinfo:                  'Y'
+
+  integration_broker:
+    acm_plugin_list:
+      PTIBConfigureDBNode:
+        env.pia_webserver_host:           "%{hiera('ps_uri')}"
+        env.pia_webserver_port:           80
+        env.pia_webserver_ssl_port:       443
+        env.pia_site_name:                "%{hiera('pia_site_name')}"
+        env.gateway_host:                 "%{hiera('cu_integration_gateway')}"
+        env.gateway_port:                 80
+        env.gateway_ssl_port:             443
+        env.use_ssl_gateway:              true
+        env.use_ssl_webserver:            true
+        env.default_user_id:              "%{hiera('cu_ib_user')}"
+        env.default_local_node_pass:      "%{hiera('cu_default_local_node_pass')}"
+        env.anonymous_default_user_id:    "%{hiera('cu_anon_user')}"
+        env.configure_wsdl_node:          false
+
+  report_distribution:
+    acm_plugin_list:
+      PTProcessSchedulerReportNode:
+        env.uri_port:                     '443'
+        env.uri_host:                     "%{hiera('ps_uri')}"
+        env.uri_resource:                 "SchedulerTransfer/%{hiera('pia_site_name')}"
+        env.url:                          "https://%{hiera('ps_uri')}:%{hiera('uri_port')}/psreports/%{hiera('pia_site_name')}"
+        env.cdm_proto:                    1
+        env.cdm_ssl_mode:                 0
+
+      PTProcessSchedulerServerConfig:
+        env.heartbeat:                    60
+        env.sleeptime:                    5
+        env.distid:                       ACM Administrator
+        env.distidtype:                   3
+        env.prcstype:                     'Application Engine,Data Mover,Optimization Engine,SQR Process,SQR Report,COBOL SQL,XML Publisher,nVision-Report,nVision-ReportBook,PSJob'
+        env.prcscategory:                 Default,LOADCACHE
+        env.processtypepriority:          '5,5,5,5,5,5,5,5,5,5'
+        env.processtypemaxconcurrent:     '3,1,2,3,3,3,3,5,5,5'
+        env.maxconcurrent:                '5,2'
+        env.prcspriority:                 '5,5'
+        env.descr:                        'Configured via Puppet and ACM'
+        env.transfermaxretry:             3
+        env.maxapiaware:                  15
+        env.transferinterval:             10
+        env.transferlogfiles:             1
+        env.srvloadbaloptn:               1
+        env.redistwrkoption:              2
+
+component_preboot_setup_order:
+  - web_profile
+  - integration_broker
+  - report_distribution
+
+component_postboot_setup_list:
+  integration_broker:
+    acm_plugin_list:
+      PTIBActivateDomain:
+        domain.activate_retry_count:      10
+        domain.activate_wait_time:        10
+
+      PTIBConfigureGatewayNodes:
+        env.gateway_host:                 "%{hiera('cu_integration_gateway')}"
+        env.gateway_port:                 80
+        env.gateway_ssl_port:             443
+        env.use_ssl_gateway:              true
+        env.default_local_node:           "%{hiera('gateway_node_name')}"
+        env.gateway_user:                 "%{hiera('pia_gateway_user')}"
+        env.gateway_password:             "%{hiera('pia_gateway_user_pwd')}"
+        env.ib_appserver_host:            "%{hiera('cu_ib_psserver_list')}"
+        env.ib_jolt_port:                 "%{hiera('jolt_port')}"
+        env.ib_node_proxy_userid:         "%{hiera('cu_ib_user')}"
+        env.ib_node_proxy_password:       "%{hiera('cu_ib_user_pwd')}"
+        env.tools_release:                "%ToolsRelease"
+        env.ib_set_as_default_node:       false
+      PTIBConfigureGatewayProperties:
+        env.gateway_keystore_password:    "%{hiera('cu_keystore_password')}"
+      PTPPConfigurePortalCluster:
+        env.portal_cluster_nodes:         "%{hiera('portal_cluster_node_list')}"
+    acm_plugin_order:
+      - PTIBActivateDomain
+      - PTIBConfigureGatewayNodes
+      - PTIBConfigureGatewayProperties
+      - PTPPConfigurePortalCluster
+
+cu_common_igw_setup_list:
+  integration_broker:
+    run_control_id:                       intbroker
+    os_user:                              "%{hiera('domain_user')}"
+
+    db_settings:
+      db_name:                            "%{hiera('db_name')}"
+      db_type:                            "%{hiera('db_platform')}"
+      db_opr_id:                          "%{hiera('db_user')}"
+      db_opr_pwd:                         "%{hiera('db_user_pwd')}"
+      db_connect_id:                      "%{hiera('db_connect_id')}"
+      db_connect_pwd:                     "%{hiera('db_connect_pwd')}"
+
+    acm_plugin_list:
+      PTIBConfigureGatewayNodes:
+        env.gateway_host:                 "%{hiera('cu_integration_gateway')}"
+        env.gateway_port:                 80
+        env.gateway_ssl_port:             443
+        env.use_ssl_gateway:              true
+        env.default_local_node:           "%{hiera('gateway_node_name')}"
+        env.gateway_user:                 "%{hiera('pia_gateway_user')}"
+        env.gateway_password:             "%{hiera('pia_gateway_user_pwd')}"
+        env.ib_appserver_host:            "%{hiera('cu_ib_psserver_list')}"
+        env.ib_jolt_port:                 "%{hiera('jolt_port')}"
+        env.ib_node_proxy_userid:         "%{hiera('cu_ib_user')}"
+        env.ib_node_proxy_password:       "%{hiera('cu_ib_user_pwd')}"
+        env.tools_release:                "%ToolsRelease"
+        env.ib_set_as_default_node:       false
+
+####  END ACM  ####
+
+# GreyHeller ERP Firewall
+erp_firewall_basedir: "%{hiera('cu_dml')}/greyheller/erpfirewall/%{hiera('erp_firewall_version')}"
+erp_firewall_version: ''
+greyheller::erpfirewall::app::archive_location: "%{hiera('erp_firewall_basedir')}"
+greyheller::erpfirewall::app::version:          "%{hiera('erp_firewall_version')}"
+greyheller::erpfirewall::web::archive_location: "%{hiera('erp_firewall_basedir')}"
+greyheller::erpfirewall::web::version:          "%{hiera('erp_firewall_version')}"
+
+# GreyHeller PeopleMobile
+peoplemobile_basedir: "%{hiera('cu_dml')}/greyheller/peoplemobile/%{hiera('peoplemobile_version')}"
+peoplemobile_version: ''
+greyheller::peoplemobile::app::archive_location: "%{hiera('peoplemobile_basedir')}"
+greyheller::peoplemobile::app::version:          "%{hiera('peoplemobile_version')}"
+greyheller::peoplemobile::web::archive_location: "%{hiera('peoplemobile_basedir')}"
+greyheller::peoplemobile::web::version:          "%{hiera('peoplemobile_version')}"
+
+### DuoWeb
+duoweb_archive_location: "%{hiera('cu_dml')}/duo_security/duoweb"
+duo_peoplesoft::archive_location: "%{hiera('cu_dml')}/duo_security/duoweb"
+duo_peoplesoft::version:          '' # specify version number matching directory in DML
+duo_peoplesoft::archive_name:     ''
+duo_peoplesoft::install_location: "/opt/pscust/%{::ps_environment}"
+
+### PeopleSoft Service based on pscontrol
+ps_service: |
+  [Unit]
+  Description=PeopleSoft
+  
+  [Service]
+  Type=simple
+  RemainAfterExit=yes
+  ExecStart=/usr/local/bin/pscontrol  --start   --domain all 
+  ExecStop=/usr/local/bin/pscontrol   --stop    --domain all
+  ExecReload=/usr/local/bin/pscontrol --restart --domain all
+  
+  [Install]
+  WantedBy=multi-user.target
+### End PeopleSoft Service

@@ -1,0 +1,10 @@
+---
+#### BEGIN REQUIRED PSADMIN SETUP ####
+tools_version:           '8.55.13'
+
+### BEGIN Application Deployment Variables ###
+app_archive_location: /app_software/pum/fscm/fscm.9.2.20161020/archives
+
+###  END Application Deployment Variables  ###
+
+####  END REQUIRED PSADMIN SETUP  ####

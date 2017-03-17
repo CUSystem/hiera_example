@@ -1,0 +1,200 @@
+---
+# PeopleSoft Region Specfic
+# DEV
+
+pia_webprofile_name:      "DEV"
+wl_heapsize:              "1024m"
+wl_threadpool:            '10'
+
+tux_stats_polling_interval: '5'
+
+cu_mailserver:            ''
+
+# NFS Mount info
+nfs_leader:        ""
+nfs_region:        ""
+nfs_psrepo:        ''
+nfs_tnsadm:        ''
+nfs_psdata:        ''
+nfs_pscust:        ''
+nfs_psreports_dir: ''
+nfs_phiwrking_dir: ''
+
+erpfirewall_failopen: true
+
+# Ping Federate Authentication Region Defaults
+pnghost:    ''
+
+# Settings to Manage in Configuration.propertes for a web server
+# This is primarily to ensure the WebUserId because the installer forces PTWEBSERVER
+# regardless of your response file
+configurationproperties:
+  "": 
+    WebProfile: "%{hiera('pia_webprofile_name')}"
+
+#### BEGIN APPSERVER ####
+appserver_domain_list:
+  "%{hiera('appserver_domain_name')}":
+    config_settings:
+      Domain Settings/Domain ID:    "%{hiera('appserver_domain_name')}"
+      PSAPPSRV/Min Instances:       3
+      PSAPPSRV/Max Instances:       3
+      PSAPPSRV/Max Fetch Size:      15000
+      Security/DomainConnectionPwd: "%{hiera('domain_conn_pwd')}"
+      JOLT Listener/Port:           "%{hiera('jolt_port')}"
+      JOLT Listener/Address:        0.0.0.0
+      Workstation Listener/Port:    "%{hiera('wsl_port')}"
+      Domain Settings/Allow Dynamic Changes: Y
+      SMTP Settings/SMTPServer:        "%{hiera('cu_mailserver')}"
+      SMTP Settings/SMTPPort:          25
+      SMTP Settings/SMTPServer1:       "%{hiera('cu_mailserver')}"
+      SMTP Settings/SMTPPort1:         25
+      SMTP Settings/SMTPSender:        "%{::ps_environment}@%PS_MACH%"
+      SMTP Settings/SMTPSourceMachine: "%PS_MACH%"
+      SMTP Settings/SMTPTrace:         0
+      PSBRKDSP_dflt/Scan Interval:     5
+      PSBRKHND_dflt/Scan Interval:     5
+      PSSUBDSP_dflt/Scan Interval:     5
+      PSSUBHND_dflt/Scan Interval:     5
+      PSPUBDSP_dflt/Scan Interval:     5
+      PSPUBHND_dflt/Scan Interval:     5
+      PSBRKHND_dflt/Min Instances:     2
+      PSBRKHND_dflt/Max Instances:     2
+      PSSUBHND_dflt/Min Instances:     2
+      PSSUBHND_dflt/Max Instances:     2
+      PSPUBHND_dflt/Min Instances:     2
+      PSPUBHND_dflt/Max Instances:     2
+      JOLT Listener/Min Handlers:      20
+      JOLT Listener/Max Handlers:      20
+      JOLT Listener/Max Clients per Handler: 20
+      PSTOOLS/EnablePPM Agent:         0
+      PSQRYSRV/Min Instances:          2
+      PSQRYSRV/Max Instances:          2
+      PSQCKSRV/Min Instances:          2
+      PSQCKSRV/Max Instances:          2
+      PSSAMSRV/Min Instances:          2   
+      PSSAMSRV/Max Instances:          2
+      Trace/TraceSql:      0
+      Trace/TracePC:       0
+      Trace/TracePPR:      0
+      Trace/TracePIA:      0
+      Trace/TraceAE:       0
+      Trace/TraceAnalytic: 9586980
+      Trace/TracePPM:      0
+
+
+    feature_settings:
+      PUBSUB:        "Yes"
+      QUICKSRV:      "Yes"
+      QUERYSRV:      "Yes"
+      JOLT:          "Yes"
+      JRAD:          "No"
+      WSL:           "Yes"
+      DBGSRV:        "No"
+      RENSRV:        "No"
+      MCF:           "No"
+      PPM:           "No"
+      PSPPMSRV:      "No"
+      ANALYTICSRV:   "No"
+      SERVER_EVENTS: "No"
+      DOMAIN_GW:     "No"
+####  END APPSERVER  ####
+
+#### BEGIN PRCSSERVER ####
+prcs_domain_list:
+  "%{hiera('prcs_domain_name')}":
+    config_settings:
+      Process Scheduler/PrcsServerName: "%{hiera('prcs_domain_id')}"
+      Security/DomainConnectionPwd:     "%{hiera('domain_conn_pwd')}"
+      Process Scheduler/Allow Dynamic Changes: Y
+      SMTP Settings/SMTPServer:         "%{hiera('cu_mailserver')}"
+      SMTP Settings/SMTPPort:           25
+      SMTP Settings/SMTPServer1:        "%{hiera('cu_mailserver')}"
+      SMTP Settings/SMTPPort1:          25
+      SMTP Settings/SMTPSender:         "%{::ps_environment}@%PS_MACH%"
+      SMTP Settings/SMTPSourceMachine:  "%PS_MACH%"
+      SMTP Settings/SMTPTrace:          0
+      PSTOOLS/EnablePPM Agent:          0
+      PSDSTSRV/Min Instances:           2
+      PSDSTSRV/Max Instances:           2
+      Trace/TraceSQL: 0
+      Trace/TracePC:  0
+      Trace/TraceAE:  0
+      Trace/TracePPM: 0
+
+    feature_settings:
+      MSTRSRV:      "Yes"
+      APPENG:       "No"
+####  END PRCSSERVER  ####
+
+#### BEGIN WEBSERVER ####
+cu_warningtimeout:               '12600'
+cu_sessiontimeout:               '14400'
+####  END WEBSERVER  ####
+
+# Database Config for RAC databases
+cu_rac_host: ''
+db_port:     6800
+
+psft_user_pwd: >
+
+db_user_pwd: >
+
+cu_ib_user_pwd: >
+
+cu_public_user_pwd: >
+
+profile_user_pwd: >
+
+db_connect_pwd: >
+
+webserver_admin_user_pwd: >
+
+pia_gateway_user_pwd: >
+
+domain_conn_pwd: >
+
+cu_default_local_node_pass: >
+
+cu_keystore_password: >
+
+cu_keystore_password_encrypted: >
+
+ses_admin_pwd: >
+
+cu_monitor_wl_user: >
+
+agent_config_pwd: >
+
+url_defn_privkey_phrase: >
+
+# drac pubkeys
+ssh_authorized_keys:
+  'oracle@<server>':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:  
+  'oracle@<server>':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:  
+  'oracle@<server>':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:  
+  'oracle@<rac-server>':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:  
+  'psadm2@<server>':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:     
+  'uc4':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:     
+  'phire':
+    user: 'psadm2'
+    type: 'ssh-rsa'
+    key:     

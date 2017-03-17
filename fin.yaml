@@ -1,0 +1,68 @@
+run_psurldefn_config_setup: true
+setup_cobol: true
+
+cobol:
+  location: "%{hiera('pt_location')}/cobol/svrexp.5.1.WP11"
+  license_serial_number: ""
+  license_key: ""
+
+dedicated_app_messaging:
+  PERBRK: 
+    type:  BRK 
+    queue: PERSON_DATA
+  PERPUB: 
+    type:  PUB 
+    queue: PERSON_DATA
+  PERSUB: 
+    type:  SUB 
+    queue: PERSON_DATA
+  ROLBRK: 
+    type:  BRK 
+    queue: ROLESYNCHEXT_CHANNEL
+  ROLPUB: 
+    type:  PUB 
+    queue: ROLESYNCHEXT_CHANNEL
+  ROLSUB: 
+    type:  SUB 
+    queue: ROLESYNCHEXT_CHANNEL
+
+# FIN URL Definitions
+psurldefn_setup_list:
+  ps_url_defn:
+    run_control_id:                       psurldefn
+    os_user:                              "%{hiera('domain_user')}"
+
+    db_settings:
+      db_name:                            "%{hiera('db_name')}"
+      db_type:                            "%{hiera('db_platform')}"
+      db_opr_id:                          "%{hiera('db_user')}"
+      db_opr_pwd:                         "%{hiera('db_user_pwd')}"
+      db_connect_id:                      "%{hiera('db_connect_id')}"
+      db_connect_pwd:                     "%{hiera('db_connect_pwd')}"
+
+    psurl_list:
+      FILESFTP:
+        PTURLConfiguration:
+          env.url_config_url_id:            'FILESFTP'
+          env.url_config_url_descr:         'SFTP Attachment Repository'
+          env.url_config_url:               "sftp://<server>/opt/pscust/%{::ps_environment}/files/ftp"
+          env.url_config_comments:          'Files are written to $PS_FILEDIR/ftp for the user who owns this instance.'
+          env.url_config_property_name:     'USER'
+          env.url_config_property_value:    "%{hiera('psft_runtime_user_name')}"
+          env.password_property_value:      "%{hiera('psft_user_pwd')}"
+      GL_FILE_IMPORT:
+        PTURLConfiguration:
+          env.url_config_url_id:            'GL_FILE_IMPORT'
+          env.url_config_url_descr:         'GL File Import URL'
+          env.url_config_url:               "sftp://<server>/opt/pscust/%{::ps_environment}/files/imports"
+          env.url_config_comments:          'Files are written to $PS_FILEDIR/ftp for the user who owns this instance.'
+          env.url_config_property_name:     'USER'
+          env.url_config_property_value:    "%{hiera('psft_runtime_user_name')}"
+          env.password_property_value:      "%{hiera('psft_user_pwd')}"
+
+filesystems:
+  "/opt/pscust/%{::ps_environment}/NVISION":
+    ensure:  'mounted'
+    device:  "%{hiera('nfs_leader')}-%{hiera('nfs_psdata')}-%{hiera('nfs_region')}:/%{hiera('nfs_psdata')}/%{hiera('nfs_pscust')}/%{::ps_productline}/%{::ps_environment}/NVISION"
+    options: 'rw,vers=3,nosuid,intr,_netdev,noatime,noacl'
+    fstype:  'nfs'
